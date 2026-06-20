@@ -16,6 +16,9 @@ namespace blessed
 
     template<typename T>
     using remove_pointer_t = std::remove_pointer_t<T>;
+
+    template<typename T>
+    using add_const_t = std::add_const_t<T>;
 }
 #else
 namespace blessed
@@ -28,6 +31,9 @@ namespace blessed
 
     template<typename T>
     using remove_pointer_t = typename std::remove_pointer<T>::type;
+
+    template<typename T>
+    using add_const_t = typename std::add_const<T>::type;
 }
 #endif
 

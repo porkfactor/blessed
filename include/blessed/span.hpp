@@ -775,8 +775,8 @@ namespace blessed
 
 namespace blessed
 {
-    template<typename _Type, typename _OffsetType>
-    _Type *reinterpret_as(span<blessed::byte> s, _OffsetType offset) noexcept
+    template<typename _Type>
+    _Type *reinterpret_as(span<blessed::byte> s, std::size_t offset = 0) noexcept
     {
         if((sizeof(_Type) + offset) <= s.size_bytes())
         {
@@ -787,13 +787,43 @@ namespace blessed
     }
 
     template<typename _Type>
-    span<_Type> reinterpret_as(span<blessed::byte> s) noexcept
+    blessed::add_const_t<_Type> *reinterpret_as(span<blessed::byte const> s, std::size_t offset = 0) noexcept
+    {
+        if((sizeof(_Type) + offset) <= s.size_bytes())
+        {
+            return reinterpret_cast<blessed::add_const_t<_Type> *>(&s[offset]);
+        }
+
+        return nullptr;
+    }
+
+    template<typename _Type>
+    span<_Type> span_cast(span<blessed::byte> s, std::size_t offset = 0) noexcept
     {
         return span<_Type>(reinterpret_as<_Type>(s, 0), s.size_bytes() / sizeof(_Type));
     }
-    
+
     template<typename _Type>
-    span<blessed::byte> reinterpret_as(span<blessed::byte> s, _Type *ptr, size_t sz) noexcept
+    span<blessed::add_const_t<_Type>> span_cast(span<blessed::byte const> s, std::size_t offset = 0) noexcept
+    {
+        return span<blessed::add_const_t<_Type>>(reinterpret_as<blessed::add_const_t<_Type>>(s, 0), s.size_bytes() / sizeof(_Type));
+    }
+
+    template<typename _Type>
+    span<blessed::byte> reinterpret_as(span<blessed::byte> s, _Type *ptr, std::size_t sz) noexcept
+    {
+        auto offset = reinterpret_cast<uintptr_t>(ptr) - reinterpret_cast<uintptr_t>(s.data());
+
+        if((sizeof(_Type) + offset) <= s.size_bytes())
+        {
+            return s.subspan(offset, sizeof(_Type));
+        }
+
+        return span<blessed::byte>{};
+    }
+
+    template<typename _Type>
+    span<blessed::byte const> reinterpret_as(span<blessed::byte const> s, blessed::add_const_t<_Type> *ptr, std::size_t sz) noexcept
     {
         auto offset = reinterpret_cast<uintptr_t>(ptr) - reinterpret_cast<uintptr_t>(s.data());
 
