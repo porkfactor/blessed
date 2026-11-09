@@ -14,7 +14,8 @@ namespace blessed
     using span = std::span<_Type, _Extent>;
 }
 #else
-#include <limits>
+#include <cassert>
+#include <climits>
 #include <array>
 
 namespace blessed
@@ -188,7 +189,7 @@ namespace blessed
 
             template <
                 class Type2,
-                blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+                blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR difference_type operator-(const span_iterator<Type2> &rhs) const noexcept
             {
                 assert(begin_ == rhs.begin_ && end_ == rhs.end_);
@@ -200,39 +201,39 @@ namespace blessed
                 return *(*this + n);
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator==(const span_iterator<Type2> &rhs) const noexcept
             {
                 assert(begin_ == rhs.begin_ && end_ == rhs.end_);
                 return current_ == rhs.current_;
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator!=(const span_iterator<Type2> &rhs) const noexcept
             {
                 return !(*this == rhs);
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator<(const span_iterator<Type2> &rhs) const noexcept
             {
                 assert(begin_ == rhs.begin_ && end_ == rhs.end_);
                 return current_ < rhs.current_;
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator>(const span_iterator<Type2> &rhs) const noexcept
             {
                 return rhs < *this;
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator<=(const span_iterator<Type2> &rhs) const noexcept
             {
                 return !(rhs < *this);
             }
 
-            template <class Type2, blessed::enable_if_t<std::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
+            template <class Type2, blessed::enable_if_t<blessed::is_same<blessed::remove_cv_t<Type2>, value_type>::value, int> = 0>
             BLESSED_CXX14_CONSTEXPR bool operator>=(const span_iterator<Type2> &rhs) const noexcept
             {
                 return !(*this < rhs);
@@ -415,14 +416,14 @@ namespace blessed
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent != dynamic_extent, int> = 0>
         BLESSED_CXX14_CONSTEXPR explicit span(pointer firstElem, pointer lastElem) noexcept
-            : storage_(firstElem, narrow_cast<std::size_t>(lastElem - firstElem))
+            : storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
         {
             assert(lastElem - firstElem == static_cast<difference_type>(Extent));
         }
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent == dynamic_extent, int> = 0>
         BLESSED_CXX14_CONSTEXPR span(pointer firstElem, pointer lastElem) noexcept
-            : storage_(firstElem, narrow_cast<std::size_t>(lastElem - firstElem))
+            : storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
         {
         }
 

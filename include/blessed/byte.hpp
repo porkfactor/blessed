@@ -2,7 +2,9 @@
 #define BLESSED_BYTE_HPP_
 
 #include <cstddef>
+
 #include <blessed/blessed.hpp>
+#include <blessed/type_traits.hpp>
 
 #if BLESSED_CXX17 || (defined(__cpp_lib_byte) && __cpp_lib_byte >= 201603)
 namespace blessed
@@ -12,9 +14,7 @@ namespace blessed
 #else
 namespace blessed
 {
-    enum class byte : unsigned char
-    {
-    };
+    enum class byte : unsigned char {};
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
     constexpr byte &operator<<=(byte &b, IntegerType shift) noexcept
@@ -93,7 +93,7 @@ namespace blessed
     template <typename T>
     constexpr byte to_byte(T t) noexcept
     {
-        return to_byte_impl<std::is_same<T, unsigned char>::value, T>(t);
+        return to_byte_impl<blessed::is_same<T, unsigned char>::value, T>(t);
     }
 
     template <int I>

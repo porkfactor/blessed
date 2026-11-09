@@ -22,6 +22,9 @@ namespace blessed
 
     template<typename T>
     using add_pointer_t = std::add_pointer_t<T>;
+
+    template<typename T, typename U>
+    using is_same = std::is_same<T, U>;
 }
 #else
 namespace blessed
@@ -40,6 +43,12 @@ namespace blessed
 
     template<typename T>
     using add_pointer_t = typename std::add_pointer<T>::type;
+
+    template<typename T, typename U>
+    struct is_same : std::false_type {};
+
+    template<typename T>
+    struct is_same<T, T> : std::true_type {};
 }
 #endif
 
