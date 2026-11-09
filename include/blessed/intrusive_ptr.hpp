@@ -9,7 +9,7 @@
 #include <blessed/blessed.hpp>
 #include <blessed/type_traits.hpp>
 
-namespace hawkstar
+namespace blessed
 {
     namespace detail
     {
@@ -119,13 +119,13 @@ namespace hawkstar
     template<class T>
     struct retain_traits final
     {
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static void increment(atomic_reference_count<U> *ptr) noexcept
         {
             ptr->count.fetch_add(1, std::memory_order_relaxed);
         }
 
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static void decrement(atomic_reference_count<U> *ptr) noexcept
         {
             ptr->count.fetch_sub(1, std::memory_order_acq_rel);
@@ -135,19 +135,19 @@ namespace hawkstar
             }
         }
 
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static long use_count(atomic_reference_count<U> *ptr) noexcept
         {
             return ptr->count.load(std::memory_order_relaxed);
         }
 
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static void increment(reference_count<U> *ptr) noexcept
         {
             ++ptr->count;
         }
 
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static void decrement(reference_count<U> *ptr) noexcept
         {
             --ptr->count;
@@ -157,7 +157,7 @@ namespace hawkstar
             }
         }
 
-        template<typename U, typename = ::hawkstar::enable_if_t<std::is_base_of<U, T>::value>>
+        template<typename U, typename = ::blessed::enable_if_t<std::is_base_of<U, T>::value>>
         static long use_count(reference_count<U> *ptr) noexcept
         {
             return ptr->count;
@@ -170,7 +170,7 @@ namespace hawkstar
         using element_type = T;
         using traits_type = R;
 
-        using pointer = detail::detected_or_t<hawkstar::add_pointer_t<element_type>, detail::has_pointer, traits_type>;
+        using pointer = detail::detected_or_t<blessed::add_pointer_t<element_type>, detail::has_pointer, traits_type>;
         using default_action = detail::detected_or_t<adopt_object_t, detail::has_default_action, traits_type>;
 
         retain_ptr(pointer ptr, retain_object_t) :

@@ -19,6 +19,9 @@ namespace blessed
 
     template<typename T>
     using add_const_t = std::add_const_t<T>;
+
+    template<typename T>
+    using add_pointer_t = std::add_pointer_t<T>;
 }
 #else
 namespace blessed
@@ -34,6 +37,9 @@ namespace blessed
 
     template<typename T>
     using add_const_t = typename std::add_const<T>::type;
+
+    template<typename T>
+    using add_pointer_t = typename std::add_pointer<T>::type;
 }
 #endif
 
