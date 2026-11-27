@@ -17,87 +17,90 @@ namespace blessed
     enum class byte : unsigned char {};
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
-    constexpr byte &operator<<=(byte &b, IntegerType shift) noexcept
+    BLESSED_CXX14_CONSTEXPR byte &operator<<=(byte &b, IntegerType shift) noexcept
     {
-        return b = byte(static_cast<unsigned char>(b) << shift);
+        return b = b << shift;
     }
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
-    constexpr byte operator<<(byte b, IntegerType shift) noexcept
+    BLESSED_CONSTEXPR byte operator<<(byte b, IntegerType shift) noexcept
     {
-        return byte(static_cast<unsigned char>(b) << shift);
+        return byte(static_cast<blessed::underlying_type_t<byte>>(b) << shift);
     }
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
-    constexpr byte &operator>>=(byte &b, IntegerType shift) noexcept
+    BLESSED_CXX14_CONSTEXPR byte &operator>>=(byte &b, IntegerType shift) noexcept
     {
-        return b = byte(static_cast<unsigned char>(b) >> shift);
+        return b = b >> shift;
     }
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
-    constexpr byte operator>>(byte b, IntegerType shift) noexcept
+    BLESSED_CONSTEXPR byte operator>>(byte b, IntegerType shift) noexcept
     {
-        return byte(static_cast<unsigned char>(b) >> shift);
+        return byte(static_cast<blessed::underlying_type_t<byte>>(b) >> shift);
     }
 
-    constexpr byte &operator|=(byte &l, byte r) noexcept
+    BLESSED_CXX14_CONSTEXPR byte &operator|=(byte &l, byte r) noexcept
     {
-        return l = byte(static_cast<unsigned char>(l) | static_cast<unsigned char>(r));
+        return l = byte(static_cast<blessed::underlying_type_t<byte>>(l) | static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte operator|(byte l, byte r) noexcept
+    BLESSED_CONSTEXPR byte operator|(byte l, byte r) noexcept
     {
-        return byte(static_cast<unsigned char>(l) | static_cast<unsigned char>(r));
+        return byte(static_cast<blessed::underlying_type_t<byte>>(l) | static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte &operator&=(byte &l, byte r) noexcept
+    BLESSED_CXX14_CONSTEXPR byte &operator&=(byte &l, byte r) noexcept
     {
-        return l = byte(static_cast<unsigned char>(l) & static_cast<unsigned char>(r));
+        return l = byte(static_cast<blessed::underlying_type_t<byte>>(l) & static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte operator&(byte l, byte r) noexcept
+    BLESSED_CONSTEXPR byte operator&(byte l, byte r) noexcept
     {
-        return byte(static_cast<unsigned char>(l) & static_cast<unsigned char>(r));
+        return byte(static_cast<blessed::underlying_type_t<byte>>(l) & static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte &operator^=(byte &l, byte r) noexcept
+    BLESSED_CXX14_CONSTEXPR byte &operator^=(byte &l, byte r) noexcept
     {
-        return l = byte(static_cast<unsigned char>(l) ^ static_cast<unsigned char>(r));
+        return l = byte(static_cast<blessed::underlying_type_t<byte>>(l) ^ static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte operator^(byte l, byte r) noexcept
+    BLESSED_CONSTEXPR byte operator^(byte l, byte r) noexcept
     {
-        return byte(static_cast<unsigned char>(l) ^ static_cast<unsigned char>(r));
+        return byte(static_cast<blessed::underlying_type_t<byte>>(l) ^ static_cast<blessed::underlying_type_t<byte>>(r));
     }
 
-    constexpr byte operator~(byte b) noexcept { return byte(~static_cast<unsigned char>(b)); }
+    BLESSED_CONSTEXPR byte operator~(byte b) noexcept
+    {
+        return byte(~static_cast<blessed::underlying_type_t<byte>>(b));
+    }
 
     template <class IntegerType, class = typename std::enable_if<std::is_integral<IntegerType>::value>::type>
-    constexpr IntegerType to_integer(byte b) noexcept
+    BLESSED_CONSTEXPR IntegerType to_integer(byte b) noexcept
     {
         return static_cast<IntegerType>(b);
     }
 
     template <bool E, typename T>
-    constexpr byte to_byte_impl(T t) noexcept
+    BLESSED_CONSTEXPR byte to_byte_impl(T t) noexcept
     {
         static_assert(E, "blessed::to_byte(t) must be provided an unsigned char, otherwise data loss may occur. ");
         return static_cast<byte>(t);
     }
     template <>
-    constexpr byte to_byte_impl<true, unsigned char>(unsigned char t) noexcept
+    BLESSED_CONSTEXPR byte to_byte_impl<true, unsigned char>(unsigned char t) noexcept
     {
         return byte(t);
     }
 
     template <typename T>
-    constexpr byte to_byte(T t) noexcept
+    BLESSED_CONSTEXPR byte to_byte(T t) noexcept
     {
         return to_byte_impl<blessed::is_same<T, unsigned char>::value, T>(t);
     }
 
     template <int I>
-    constexpr byte to_byte() noexcept
+    BLESSED_CONSTEXPR byte to_byte() noexcept
     {
         static_assert(I >= 0 && I <= 255, "blessed::byte only has 8 bits of storage, values must be in range 0-255");
         return static_cast<byte>(I);
