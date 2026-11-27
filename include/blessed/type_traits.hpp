@@ -1,56 +1,27 @@
 #ifndef BLESSED_TYPE_TRAITS_HPP_
 #define BLESSED_TYPE_TRAITS_HPP_
 
-#include <type_traits>
+#include <blessed/traits/transformation_trait_aliases.hpp>
 
-#include <blessed/blessed.hpp>
-
-#if BLESSED_CXX14
-namespace blessed
-{
-    template<bool B, typename T = void>
-    using enable_if_t = std::enable_if_t<B, T>;
-
-    template<typename T>
-    using remove_cv_t = std::remove_cv_t<T>;
-
-    template<typename T>
-    using remove_pointer_t = std::remove_pointer_t<T>;
-
-    template<typename T>
-    using add_const_t = std::add_const_t<T>;
-
-    template<typename T>
-    using add_pointer_t = std::add_pointer_t<T>;
-
-    template<typename T, typename U>
-    using is_same = std::is_same<T, U>;
-}
-#else
-namespace blessed
-{
-    template<bool B, typename T = void>
-    using enable_if_t = typename std::enable_if<B, T>::type;
-
-    template<typename T>
-    using remove_cv_t = typename std::remove_cv<T>::type;
-
-    template<typename T>
-    using remove_pointer_t = typename std::remove_pointer<T>::type;
-
-    template<typename T>
-    using add_const_t = typename std::add_const<T>::type;
-
-    template<typename T>
-    using add_pointer_t = typename std::add_pointer<T>::type;
-
-    template<typename T, typename U>
-    struct is_same : std::false_type {};
-
-    template<typename T>
-    struct is_same<T, T> : std::true_type {};
-}
-#endif
-
+#include <blessed/traits/as_const.hpp>
+#include <blessed/traits/bool_constant.hpp>
+#include <blessed/traits/const_iterator.hpp>
+#include <blessed/traits/exchange.hpp>
+#include <blessed/traits/is_final.hpp>
+#include <blessed/traits/is_invocable.hpp>
+#include <blessed/traits/is_swappable.hpp>
+#include <blessed/traits/is_trivially_assignable.hpp>
+#include <blessed/traits/is_trivially_constructible.hpp>
+#include <blessed/traits/is_trivially_copyable.hpp>
+#include <blessed/traits/is_trivially_default_constructible.hpp>
+#include <blessed/traits/is_trivially_destructible.hpp>
+#include <blessed/traits/logical_traits.hpp>
+#include <blessed/traits/make_reverse_iterator.hpp>
+#include <blessed/traits/make_unsigned.hpp>
+#include <blessed/traits/non_member_container_access.hpp>
+#include <blessed/traits/remove_cvref.hpp>
+#include <blessed/traits/ssize.hpp>
+#include <blessed/traits/to_underlying.hpp>
+#include <blessed/traits/void_t.hpp>
 
 #endif
