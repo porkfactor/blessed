@@ -17,7 +17,6 @@
 #include <blessed/traits/is_trivially_destructible.hpp>
 #include <blessed/traits/logical_traits.hpp>
 #include <blessed/traits/make_reverse_iterator.hpp>
-#include <blessed/traits/make_unsigned.hpp>
 #include <blessed/traits/non_member_container_access.hpp>
 #include <blessed/traits/remove_cvref.hpp>
 #include <blessed/traits/ssize.hpp>

@@ -10,7 +10,7 @@
 #if !(defined(__cpp_lib_as_const) && __cpp_lib_as_const >= 201510L)
 
 #include <blessed/blessed.hpp>
-#include <blessed/traits/add_const_t.hpp>
+#include <blessed/traits/transformation_trait_aliases.hpp>
 
 namespace blessed
 {

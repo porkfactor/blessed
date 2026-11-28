@@ -269,11 +269,7 @@ namespace blessed
 
             // Tell the STL that span_iterator should not be unwrapped if it can't
             // validate in advance, even in release / optimized builds:
-#if defined(GSL_USE_STATIC_CONSTEXPR_WORKAROUND)
-            static constexpr const bool _Unwrap_when_unverified = false;
-#else
             static constexpr bool _Unwrap_when_unverified = false;
-#endif
 
             constexpr void _Seek_to(const pointer p) noexcept
             { // adjust the position of *this to previously verified location p
@@ -309,7 +305,7 @@ namespace blessed
 {
     namespace detail
     {
-        template <std::size_t Ext>
+        template <std::size_t _Extent>
         class extent_type
         {
         public:
@@ -319,16 +315,18 @@ namespace blessed
 
             BLESSED_CXX14_CONSTEXPR explicit extent_type(extent_type<dynamic_extent>);
 
-            BLESSED_CXX14_CONSTEXPR explicit extent_type(size_type size) { assert(size == Ext); }
+            BLESSED_CXX14_CONSTEXPR explicit extent_type(size_type size)
+            {
+                assert(size == _Extent);
+            }
 
-            BLESSED_CXX14_CONSTEXPR size_type size() const noexcept { return Ext; }
+            BLESSED_CXX14_CONSTEXPR size_type size() const noexcept
+            {
+                return _Extent;
+            }
 
         private:
-#if defined(GSL_USE_STATIC_CONSTEXPR_WORKAROUND)
-            static constexpr const size_type size_ = Ext; // static size equal to Ext
-#else
-            static constexpr size_type size_ = Ext; // static size equal to Ext
-#endif
+            static constexpr size_type size_ = _Extent;
         };
 
         template <>
@@ -338,25 +336,29 @@ namespace blessed
             using size_type = std::size_t;
 
             template <size_type Other>
-            BLESSED_CXX14_CONSTEXPR explicit extent_type(extent_type<Other> ext) : size_(ext.size())
-            {
-            }
+            BLESSED_CXX14_CONSTEXPR explicit extent_type(extent_type<Other> ext) :
+                size_(ext.size())
+            {}
 
-            BLESSED_CXX14_CONSTEXPR explicit extent_type(size_type size) : size_(size)
+            BLESSED_CXX14_CONSTEXPR explicit extent_type(size_type size) :
+                size_(size)
             {
                 assert(size != dynamic_extent);
             }
 
-            BLESSED_CXX14_CONSTEXPR size_type size() const noexcept { return size_; }
+            BLESSED_CXX14_CONSTEXPR size_type size() const noexcept
+            {
+                return size_;
+            }
 
         private:
             size_type size_;
         };
 
-        template <std::size_t Ext>
-        BLESSED_CXX14_CONSTEXPR extent_type<Ext>::extent_type(extent_type<dynamic_extent> ext)
+        template <std::size_t Extent>
+        BLESSED_CXX14_CONSTEXPR extent_type<Extent>::extent_type(extent_type<dynamic_extent> ext)
         {
-            assert(ext.size() == Ext);
+            assert(ext.size() == Extent);
         }
 
         template <class ElementType, std::size_t Extent, std::size_t Offset, std::size_t Count>
@@ -366,14 +368,12 @@ namespace blessed
                                                ? Count
                                                : (Extent != dynamic_extent ? Extent - Offset : Extent)>;
         };
-    } // namespace detail
+    }
 
-    // [span], class template span
     template <class ElementType, std::size_t Extent>
     class span
     {
     public:
-        // constants and types
         using element_type = ElementType;
         using value_type = blessed::remove_cv_t<ElementType>;
         using size_type = std::size_t;
@@ -386,22 +386,12 @@ namespace blessed
         using iterator = detail::span_iterator<ElementType>;
         using reverse_iterator = std::reverse_iterator<iterator>;
 
-#if defined(GSL_USE_STATIC_CONSTEXPR_WORKAROUND)
-        static constexpr const size_type extent{Extent};
-#else
         static constexpr size_type extent{Extent};
-#endif
 
-        // [span.cons], span constructors, copy, assignment, and destructor
-        template <bool Dependent = false,
-                  // "Dependent" is needed to make "blessed::enable_if_t<Dependent || Extent == 0 || Extent
-                  // == dynamic_extent>" SFINAE, since "blessed::enable_if_t<Extent == 0 || Extent ==
-                  // dynamic_extent>" is ill-formed when Extent is greater than 0.
-                  class = blessed::enable_if_t<(Dependent ||
-                                                detail::is_allowed_extent_conversion<0, Extent>::value)>>
-        BLESSED_CXX14_CONSTEXPR span() noexcept : storage_(nullptr, detail::extent_type<0>())
-        {
-        }
+        template <bool Dependent = false, class = blessed::enable_if_t<(Dependent || detail::is_allowed_extent_conversion<0, Extent>::value)>>
+        BLESSED_CXX14_CONSTEXPR span() noexcept :
+            storage_(nullptr, detail::extent_type<0>())
+        {}
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent != dynamic_extent, int> = 0>
         BLESSED_CXX14_CONSTEXPR explicit span(pointer ptr, size_type count) noexcept : storage_(ptr, count)
@@ -411,48 +401,41 @@ namespace blessed
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent == dynamic_extent, int> = 0>
         BLESSED_CXX14_CONSTEXPR span(pointer ptr, size_type count) noexcept : storage_(ptr, count)
-        {
-        }
+        {}
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent != dynamic_extent, int> = 0>
-        BLESSED_CXX14_CONSTEXPR explicit span(pointer firstElem, pointer lastElem) noexcept
-            : storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
+        BLESSED_CXX14_CONSTEXPR explicit span(pointer firstElem, pointer lastElem) noexcept :
+            storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
         {
             assert(lastElem - firstElem == static_cast<difference_type>(Extent));
         }
 
         template <std::size_t MyExtent = Extent, blessed::enable_if_t<MyExtent == dynamic_extent, int> = 0>
-        BLESSED_CXX14_CONSTEXPR span(pointer firstElem, pointer lastElem) noexcept
-            : storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR span(pointer firstElem, pointer lastElem) noexcept :
+            storage_(firstElem, static_cast<std::size_t>(lastElem - firstElem))
+        {}
 
         template <std::size_t N,
                   blessed::enable_if_t<detail::is_allowed_extent_conversion<N, Extent>::value, int> = 0>
-        BLESSED_CXX14_CONSTEXPR span(element_type (&arr)[N]) noexcept
-            : storage_(KnownNotNull{arr}, detail::extent_type<N>())
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR span(element_type (&arr)[N]) noexcept :
+            storage_(KnownNotNull{arr}, detail::extent_type<N>())
+        {}
 
-        template <
-            class T, std::size_t N,
-            blessed::enable_if_t<(detail::is_allowed_extent_conversion<N, Extent>::value &&
-                                  detail::is_allowed_element_type_conversion<T, element_type>::value),
-                                 int> = 0>
-        BLESSED_CXX14_CONSTEXPR span(std::array<T, N> &arr) noexcept
-            : storage_(KnownNotNull{arr.data()}, detail::extent_type<N>())
-        {
-        }
+        template <class T, std::size_t N, blessed::enable_if_t<
+            (detail::is_allowed_extent_conversion<N, Extent>::value && detail::is_allowed_element_type_conversion<T, element_type>::value),
+            int> = 0>
+        BLESSED_CXX14_CONSTEXPR span(std::array<T, N> &arr) noexcept :
+            storage_(KnownNotNull{arr.data()}, detail::extent_type<N>())
+        {}
 
         template <class T, std::size_t N,
                   blessed::enable_if_t<
                       (detail::is_allowed_extent_conversion<N, Extent>::value &&
                        detail::is_allowed_element_type_conversion<const T, element_type>::value),
                       int> = 0>
-        constexpr span(const std::array<T, N> &arr) noexcept
-            : storage_(KnownNotNull{arr.data()}, detail::extent_type<N>())
-        {
-        }
+        constexpr span(const std::array<T, N> &arr) noexcept :
+            storage_(KnownNotNull{arr.data()}, detail::extent_type<N>())
+        {}
 
         // NB: the SFINAE on these constructors uses .data() as an incomplete/imperfect proxy for the
         // requirement on Container to be a contiguous sequence container.
@@ -466,8 +449,7 @@ namespace blessed
                               element_type (*)[]>::value,
                       int> = 0>
         constexpr explicit span(Container &cont) noexcept : span(cont.data(), cont.size())
-        {
-        }
+        {}
 
         template <std::size_t MyExtent = Extent, class Container,
                   blessed::enable_if_t<
@@ -478,9 +460,9 @@ namespace blessed
                               blessed::remove_pointer_t<decltype(std::declval<Container &>().data())> (*)[],
                               element_type (*)[]>::value,
                       int> = 0>
-        constexpr span(Container &cont) noexcept : span(cont.data(), cont.size())
-        {
-        }
+        constexpr span(Container &cont) noexcept :
+            span(cont.data(), cont.size())
+        {}
 
         template <
             std::size_t MyExtent = Extent, class Container,
@@ -492,9 +474,9 @@ namespace blessed
                         blessed::remove_pointer_t<decltype(std::declval<const Container &>().data())> (*)[],
                         element_type (*)[]>::value,
                 int> = 0>
-        BLESSED_CXX14_CONSTEXPR explicit span(const Container &cont) noexcept : span(cont.data(), cont.size())
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR explicit span(const Container &cont) noexcept :
+            span(cont.data(), cont.size())
+        {}
 
         template <
             std::size_t MyExtent = Extent, class Container,
@@ -506,9 +488,9 @@ namespace blessed
                         blessed::remove_pointer_t<decltype(std::declval<const Container &>().data())> (*)[],
                         element_type (*)[]>::value,
                 int> = 0>
-        BLESSED_CXX14_CONSTEXPR span(const Container &cont) noexcept : span(cont.data(), cont.size())
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR span(const Container &cont) noexcept :
+            span(cont.data(), cont.size())
+        {}
 
         BLESSED_CXX14_CONSTEXPR span(const span &other) noexcept = default;
 
@@ -517,20 +499,18 @@ namespace blessed
                                            detail::is_allowed_element_type_conversion<OtherElementType,
                                                                                       element_type>::value,
                                        int> = 0>
-        BLESSED_CXX14_CONSTEXPR span(const span<OtherElementType, OtherExtent> &other) noexcept
-            : storage_(other.data(), detail::extent_type<OtherExtent>(other.size()))
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR span(const span<OtherElementType, OtherExtent> &other) noexcept :
+            storage_(other.data(), detail::extent_type<OtherExtent>(other.size()))
+        {}
 
         template <class OtherElementType, std::size_t OtherExtent, std::size_t MyExtent = Extent,
                   blessed::enable_if_t<MyExtent != dynamic_extent && OtherExtent == dynamic_extent &&
                                            detail::is_allowed_element_type_conversion<OtherElementType,
                                                                                       element_type>::value,
                                        int> = 0>
-        BLESSED_CXX14_CONSTEXPR explicit span(const span<OtherElementType, OtherExtent> &other) noexcept
-            : storage_(other.data(), detail::extent_type<OtherExtent>(other.size()))
-        {
-        }
+        BLESSED_CXX14_CONSTEXPR explicit span(const span<OtherElementType, OtherExtent> &other) noexcept :
+            storage_(other.data(), detail::extent_type<OtherExtent>(other.size()))
+        {}
 
         ~span() noexcept = default;
         BLESSED_CXX14_CONSTEXPR span &operator=(const span &other) noexcept = default;
@@ -554,8 +534,7 @@ namespace blessed
         BLESSED_CXX14_CONSTEXPR auto subspan() const noexcept -> typename detail::calculate_subspan_type<ElementType, Extent, Offset, Count>::type
         {
             assert((size() >= Offset) && (Count == dynamic_extent || (Count <= size() - Offset)));
-            using type =
-                typename detail::calculate_subspan_type<ElementType, Extent, Offset, Count>::type;
+            using type = typename detail::calculate_subspan_type<ElementType, Extent, Offset, Count>::type;
             return type{data() + Offset, Count == dynamic_extent ? size() - Offset : Count};
         }
 
@@ -577,8 +556,10 @@ namespace blessed
             return make_subspan(offset, count, subspan_selector<Extent>{});
         }
 
-        // [span.obs], span observers
-        BLESSED_CXX14_CONSTEXPR size_type size() const noexcept { return storage_.size(); }
+        BLESSED_CXX14_CONSTEXPR size_type size() const noexcept
+        {
+            return storage_.size();
+        }
 
         BLESSED_CXX14_CONSTEXPR size_type size_bytes() const noexcept
         {
@@ -586,9 +567,11 @@ namespace blessed
             return size() * sizeof(element_type);
         }
 
-        BLESSED_CXX14_CONSTEXPR bool empty() const noexcept { return size() == 0; }
+        BLESSED_CXX14_CONSTEXPR bool empty() const noexcept
+        {
+            return size() == 0;
+        }
 
-        // [span.elem], span element access
         BLESSED_CXX14_CONSTEXPR reference operator[](size_type idx) const noexcept
         {
             assert(idx < size());
@@ -607,9 +590,11 @@ namespace blessed
             return data()[size() - 1];
         }
 
-        BLESSED_CXX14_CONSTEXPR pointer data() const noexcept { return storage_.data(); }
+        BLESSED_CXX14_CONSTEXPR pointer data() const noexcept
+        {
+            return storage_.data();
+        }
 
-        // [span.iter], span iterator support
         BLESSED_CXX14_CONSTEXPR iterator begin() const noexcept
         {
             const auto data = storage_.data();
@@ -625,12 +610,23 @@ namespace blessed
             return {data, endData, endData};
         }
 
-        BLESSED_CXX14_CONSTEXPR reverse_iterator rbegin() const noexcept { return reverse_iterator{end()}; }
-        BLESSED_CXX14_CONSTEXPR reverse_iterator rend() const noexcept { return reverse_iterator{begin()}; }
+        BLESSED_CXX14_CONSTEXPR reverse_iterator rbegin() const noexcept
+        {
+            return reverse_iterator{end()};
+        }
+
+        BLESSED_CXX14_CONSTEXPR reverse_iterator rend() const noexcept
+        {
+            return reverse_iterator{begin()};
+        }
 
 #ifdef _MSC_VER
         // Tell MSVC how to unwrap spans in range-based-for
-        constexpr pointer _Unchecked_begin() const noexcept { return data(); }
+        constexpr pointer _Unchecked_begin() const noexcept
+        {
+            return data();
+        }
+
         constexpr pointer _Unchecked_end() const noexcept
         {
             return data() + size();
@@ -644,18 +640,13 @@ namespace blessed
             pointer p;
         };
 
-        // this implementation detail class lets us take advantage of the
-        // empty base class optimization to pay for only storage of a single
-        // pointer in the case of fixed-size spans
         template <class ExtentType>
         class storage_type : public ExtentType
         {
         public:
-            // KnownNotNull parameter is needed to remove unnecessary null check
-            // in subspans and constructors from arrays
             template <class OtherExtentType>
-            BLESSED_CXX14_CONSTEXPR storage_type(KnownNotNull data, OtherExtentType ext)
-                : ExtentType(ext), data_(data.p)
+            BLESSED_CXX14_CONSTEXPR storage_type(KnownNotNull data, OtherExtentType ext) :
+                ExtentType(ext), data_(data.p)
             {
             }
 
@@ -673,9 +664,9 @@ namespace blessed
 
         storage_type<detail::extent_type<Extent>> storage_;
 
-        // The rest is needed to remove unnecessary null check
-        // in subspans and constructors from arrays
-        BLESSED_CXX14_CONSTEXPR span(KnownNotNull ptr, size_type count) noexcept : storage_(ptr, count) {}
+        BLESSED_CXX14_CONSTEXPR span(KnownNotNull ptr, size_type count) noexcept :
+            storage_(ptr, count)
+        {}
 
         template <std::size_t CallerExtent>
         class subspan_selector
@@ -723,11 +714,6 @@ namespace blessed
     template <class Container, class Element = blessed::remove_pointer_t<decltype(std::declval<const Container &>().data())>>
     span(const Container &) -> span<Element>;
 
-#endif // ( defined(__cpp_deduction_guides) && (__cpp_deduction_guides >= 201611L) )
-
-#if defined(GSL_USE_STATIC_CONSTEXPR_WORKAROUND)
-    template <class ElementType, std::size_t Extent>
-    constexpr const typename span<ElementType, Extent>::size_type span<ElementType, Extent>::extent;
 #endif
 
     namespace detail

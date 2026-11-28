@@ -746,23 +746,28 @@ namespace blessed
 
 namespace blessed
 {
-#define BLESSED_DETAIL_STRING_VIEW_HASH                                                       \
-    template <typename CharT, typename Traits>                                                \
-    struct hash<blessed::basic_string_view<CharT, Traits>>                               \
-    {                                                                                         \
-        size_t operator()(const blessed::basic_string_view<CharT, Traits> s) const noexcept   \
-        {                                                                                     \
-            using value_type = blessed::remove_pointer_t<decltype(s.data())>;                 \
-            return blessed::hash_detail::CityHash{}(s.data(), s.size() * sizeof(value_type)); \
-        }                                                                                     \
+    template <typename CharT, typename Traits>
+    struct hash<blessed::basic_string_view<CharT, Traits>>
+    {
+        size_t operator()(const blessed::basic_string_view<CharT, Traits> s) const noexcept
+        {
+            using value_type = blessed::remove_pointer_t<decltype(s.data())>;
+            return blessed::hash_detail::CityHash{}(s.data(), s.size() * sizeof(value_type));
+        }
     };
-
-    BLESSED_DETAIL_STRING_VIEW_HASH;
 }
 
 namespace std
 {
-    BLESSED_DETAIL_STRING_VIEW_HASH;
+    template <typename CharT, typename Traits>
+    struct hash<blessed::basic_string_view<CharT, Traits>>
+    {
+        size_t operator()(const blessed::basic_string_view<CharT, Traits> s) const noexcept
+        {
+            using value_type = blessed::remove_pointer_t<decltype(s.data())>;
+            return blessed::hash_detail::CityHash{}(s.data(), s.size() * sizeof(value_type));
+        }
+    };
 }
 
 #endif
